@@ -168,7 +168,10 @@ public class WhatsappService {
                     break;
                 }
             }
-            index=-1;
+            if(flag==true){
+                break;
+            }
+            index = -1;
         }
 
         if(flag==false){
