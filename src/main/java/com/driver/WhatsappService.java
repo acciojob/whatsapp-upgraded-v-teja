@@ -102,11 +102,11 @@ public class WhatsappService {
             message.setUser(sender);
             int size = whatsappRepository.getMessageRepository().size();
             message.setId(size+1);
-            whatsappRepository.getMessageRepository().put(size+1,message);
+            whatsappRepository.getMessageRepository().put(message.getId(),message);
 
             sender.getMessageList().add(message);
 
-            whatsappRepository.getUserRepository().put(sender.getName(),sender);
+            whatsappRepository.getUserRepository().put(sender.getMobile(),sender);
 
             group.getMessageList().add(message);
             List<User> users = whatsappRepository.getGroupRepository().get(group);
@@ -163,67 +163,63 @@ public class WhatsappService {
         //If user is found in a group and it is the admin, throw "Cannot remove admin" exception
         //If user is not the admin, remove the user from the group, remove all its messages from all the databases, and update relevant attributes accordingly.
         //If user is removed successfully, return (the updated number of users in the group + the updated number of messages in group + the updated number of overall messages)
-        boolean flag = false;
-        int index=-1;
+        boolean userFound = false;
         Group userGroup = null;
+        int index = -1;
         for(Group group: whatsappRepository.getGroupRepository().keySet()){
-            for(User user1: whatsappRepository.getGroupRepository().get(group)){
+            List<User> participants = whatsappRepository.getGroupRepository().get(group);
+            for(User participant: participants){
                 index++;
-                if(user.equals(user1)){
+                if(participant.equals(user)){
+                    if(index==0){
+                        throw new Exception("Cannot remove admin");
+                    }
                     userGroup = group;
-                    flag = true;
+                    userFound = true;
                     break;
                 }
             }
-            if(flag==true){
+            index = -1;
+            if(userFound){
                 break;
             }
-            index = -1;
         }
-
-        if(flag==false){
-            throw  new Exception("User not found");
-        }
-        if(index==0){
-            throw new Exception("Cannot remove admin");
-        }else if(index>0 && userGroup!=null){
-            //remove user from group list
-            List<User> updatedUserList = new ArrayList<>();
-            List<User> userLIst = whatsappRepository.getGroupRepository().get(userGroup);
-            for(User updatedUsers: userLIst){
-                if(updatedUsers.equals(user))
+        if(userFound){
+            //remove user from user repository
+            whatsappRepository.getUserRepository().remove(user);
+            //remove user from group user list
+            List<User> users = whatsappRepository.getGroupRepository().get(userGroup);
+            List<User> updatedUsers = new ArrayList<>();
+            for(User participant: users){
+                if(participant.equals(user))
                     continue;
-                updatedUserList.add(updatedUsers);
+                updatedUsers.add(participant);
             }
-            whatsappRepository.getGroupRepository().put(userGroup,updatedUserList);
+            whatsappRepository.getGroupRepository().put(userGroup, updatedUsers);
 
-            //removing user from user repo
-            whatsappRepository.getUserRepository().remove(user.getMobile());
-
-            //remove user messages from group message list
-            List<Message> messageList = userGroup.getMessageList();
-            List<Message> updatedMessageList = new ArrayList<>();
-            for(Message updatedMessage : messageList){
-                if(updatedMessage.getUser().equals(user) && updatedMessage.getGroup().equals(userGroup))
+            //remove messages from group meesagelist
+            List<Message> messages = userGroup.getMessageList();
+            List<Message> updatedMessages = new ArrayList<>();
+            for(Message message: messages){
+                if(message.getUser().equals(user))
                     continue;
-                updatedMessageList.add(updatedMessage);
+                updatedMessages.add(message);
             }
-            userGroup.setMessageList(updatedMessageList);
-            whatsappRepository.getGroupRepository().put(userGroup,updatedUserList);
+           userGroup.setMessageList(updatedMessages);
 
-            for(int i: whatsappRepository.getMessageRepository().keySet()){
-                if(whatsappRepository.getMessageRepository().get(i).getUser().equals(user) && whatsappRepository.getMessageRepository().get(i).getGroup().equals(userGroup)){
-                    whatsappRepository.getMessageRepository().remove(i);
-                }
+            //remove messages from message repository
+            HashMap<Integer, Message> updatedMessageMap= new HashMap<>();
+            for(Integer integer: whatsappRepository.getMessageRepository().keySet()){
+                if(whatsappRepository.getMessageRepository().get(integer).getUser().equals(user) &&
+                        whatsappRepository.getMessageRepository().get(integer).getGroup().equals(userGroup))
+                    continue;
+                updatedMessageMap.put(integer,whatsappRepository.getMessageRepository().get(integer));
             }
+            whatsappRepository.setMessageRepository(updatedMessageMap);
 
+            return updatedUsers.size()+ userGroup.getMessageList().size() + updatedMessageMap.size();
         }
-
-        int noOfUsers = whatsappRepository.getGroupRepository().get(userGroup).size();
-        int noOfMessagesInGroup = userGroup.getMessageList().size();
-        int overallMessages = whatsappRepository.getMessageRepository().size();
-
-        return noOfUsers+noOfMessagesInGroup+ overallMessages;
+        throw new Exception("User not found");
     }
 
     public String findMessage(Date start, Date end, int k) throws Exception {
