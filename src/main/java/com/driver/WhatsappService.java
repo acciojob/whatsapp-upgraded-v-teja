@@ -180,10 +180,30 @@ public class WhatsappService {
         if(index==0){
             throw new Exception("Cannot remove admin");
         }else{
-            whatsappRepository.getGroupRepository().get(userGroup).remove(user);
+            //remove user from group list
+            List<User> updatedUserList = new ArrayList<>();
+            List<User> userLIst = whatsappRepository.getGroupRepository().get(userGroup);
+            for(User updatedUsers: userLIst){
+                if(updatedUsers.equals(user))
+                    continue;
+                updatedUserList.add(updatedUsers);
+            }
+            whatsappRepository.getGroupRepository().put(userGroup,updatedUserList);
+
+            //removing user from user repo
             whatsappRepository.getUserRepository().remove(user.getName());
 
             userGroup.getMessageList().removeIf(message -> message.getUser().equals(user));
+            //remove user messages from group message list
+            List<Message> messageList = userGroup.getMessageList();
+            List<Message> updatedMessageList = new ArrayList<>();
+            for(Message updatedMessage : messageList){
+                if(updatedMessage.getUser().equals(user) && updatedMessage.getGroup().equals(userGroup))
+                    continue;
+                updatedMessageList.add(updatedMessage);
+            }
+            userGroup.setMessageList(updatedMessageList);
+            whatsappRepository.getGroupRepository().put(userGroup,updatedUserList);
 
             for(int i: whatsappRepository.getMessageRepository().keySet()){
                 if(whatsappRepository.getMessageRepository().get(i).getUser().equals(user) && whatsappRepository.getMessageRepository().get(i).getGroup().equals(userGroup)){
