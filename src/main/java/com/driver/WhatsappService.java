@@ -198,7 +198,7 @@ public class WhatsappService {
             whatsappRepository.getGroupRepository().put(userGroup,updatedUserList);
 
             //removing user from user repo
-            whatsappRepository.getUserRepository().remove(user.getName());
+            whatsappRepository.getUserRepository().remove(user.getMobile());
 
             userGroup.getMessageList().removeIf(message -> message.getUser().equals(user));
             //remove user messages from group message list
