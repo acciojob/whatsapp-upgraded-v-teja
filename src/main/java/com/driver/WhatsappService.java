@@ -91,6 +91,7 @@ public class WhatsappService {
             for(User user  : whatsappRepository.getGroupRepository().get(group)){
                 if(user.equals(sender)){
                     flag =true;
+                    break;
                 }
             }
             if(flag ==false){
@@ -99,6 +100,10 @@ public class WhatsappService {
 
             message.setGroup(group);
             message.setUser(sender);
+            int size = whatsappRepository.getMessageRepository().size();
+            message.setId(size+1);
+            whatsappRepository.getMessageRepository().put(size+1,message);
+
             sender.getMessageList().add(message);
 
             whatsappRepository.getUserRepository().put(sender.getName(),sender);
@@ -106,6 +111,8 @@ public class WhatsappService {
             group.getMessageList().add(message);
             List<User> users = whatsappRepository.getGroupRepository().get(group);
             whatsappRepository.getGroupRepository().put(group,users);
+
+
         }catch (Exception e){
             System.out.println(e);
         }
