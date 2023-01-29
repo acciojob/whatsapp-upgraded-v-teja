@@ -68,5 +68,6 @@ public class Message {
     }
 
     public Message(){
+        this.timestamp = new Date();
     }
 }

@@ -100,14 +100,16 @@ public class WhatsappService {
 
             message.setGroup(group);
             message.setUser(sender);
+            //adding message to message repository
             int size = whatsappRepository.getMessageRepository().size();
             message.setId(size+1);
             whatsappRepository.getMessageRepository().put(message.getId(),message);
 
+            //adding message to user or sender message list
             sender.getMessageList().add(message);
-
             whatsappRepository.getUserRepository().put(sender.getMobile(),sender);
 
+            //adding message to group messagelist
             group.getMessageList().add(message);
             List<User> users = whatsappRepository.getGroupRepository().get(group);
             whatsappRepository.getGroupRepository().put(group,users);
@@ -116,6 +118,8 @@ public class WhatsappService {
         }catch (Exception e){
             System.out.println(e);
         }
+
+
         return group.getMessageList().size();
 
     }
@@ -186,7 +190,8 @@ public class WhatsappService {
         }
         if(userFound){
             //remove user from user repository
-            whatsappRepository.getUserRepository().remove(user);
+            //whatsappRepository.getUserRepository().remove(user);
+
             //remove user from group user list
             List<User> users = whatsappRepository.getGroupRepository().get(userGroup);
             List<User> updatedUsers = new ArrayList<>();
