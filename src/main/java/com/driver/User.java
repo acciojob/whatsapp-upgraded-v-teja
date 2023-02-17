@@ -1,5 +1,7 @@
 package com.driver;
 
+import java.util.HashSet;
+
 public class User {
     private String name;
     private String mobile;
@@ -13,12 +15,12 @@ public class User {
         return name;
     }
 
-    public String getMobile() {
-        return mobile;
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getMobile() {
+        return mobile;
     }
 
     public void setMobile(String mobile) {
