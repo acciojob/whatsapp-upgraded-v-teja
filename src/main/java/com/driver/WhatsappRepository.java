@@ -186,9 +186,9 @@ public class WhatsappRepository {
 
         //_______________________________________________________________________________________
         //Ignore this part
-       // System.out.println(" total parti : " + usersGroup.getNumberOfParticipants() +
-           //     " total messages in group : " + groupMessageMap.get(usersGroup).size() +
-            //    " total senders : " + senderMap.size());
+        System.out.println(" total parti : " + usersGroup.getNumberOfParticipants() +
+                " total messages in group : " + groupMessageMap.get(usersGroup).size() +
+                " total senders : " + senderMap.size());
         //_______________________________________________________________________________________
 
         //Now we have to remove all his messages from the
